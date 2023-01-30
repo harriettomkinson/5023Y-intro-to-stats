@@ -95,6 +95,7 @@ difference_summary %>%
   mutate(se= sd/sqrt(n))
 #adds a standard error for the previously calculated standard deviation
 
+#an idealised normal distribution
 x <- seq(-4, 4, length=100)
 #Create a sequence of 100 equally spaced numbers between -4 and 4
 
@@ -106,4 +107,13 @@ plot(x,y, type = "l", lwd = 2, axes = FALSE, xlab = "", ylab = "")
 axis(1, at = -3:3, labels = c("-3s", "-2s", "-1s", "mean", "1s", "2s", "3s"))
 #plot x and y as a scatterplot with connected lines (type = "l") and add
 #an x-axis with custom labels
+
+lowerCI <- 2.62-(2*1.22)
+
+upperCI <- 2.62+(2*1.22)
+
+lowerCI
+upperCI
+#working out 95% confidence interval range of estimated means
+#these are printed in the console
 
