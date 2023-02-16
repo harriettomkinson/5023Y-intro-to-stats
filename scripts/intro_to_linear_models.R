@@ -78,3 +78,22 @@ performance::check_model(lsmodel1)
 performance::check_model(lsmodel1, check=c("normality","qq"))
 plot(lsmodel1, which=c(2,2))
 #outputs a plot of the Darwin data to check the data's normality
+
+performance::check_model(lsmodel1, check="homogeneity")
+plot(lsmodel1, which=c(1,3))
+#checks for equal variances of the data
+
+performance::check_model(lsmodel1, check="outliers")
+plot(lsmodel1, which=c(4,4))
+#checks for outliers
+
+darwin %>% 
+  ggplot(aes(x=type, 
+             y=height))+
+  geom_jitter(width=0.1, 
+              pch=21, 
+              aes(fill=type))+
+  theme_classic()+
+  geom_segment(aes(x=1, xend=2, y=20.192, yend=20.192-2.617), linetype="dashed")+
+  stat_summary(fun.y=mean, geom="crossbar", width=0.2)
+#outputs a plot which summarises the Darwin data
