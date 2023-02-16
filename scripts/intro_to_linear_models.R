@@ -16,4 +16,65 @@ mean(darwin$height)
 lsmodel1 <- lm(height ~ type, data=darwin)
 #fits the data as a linear model
 broom::tidy(lsmodel1)
+#outputs a table of a range of values in addition to an intercept
 
+darwin %>% 
+  group_by(type) %>% 
+  summarise(mean=mean(height))
+#confirms the fact that selfed plants are an average of 2.6 inches shorter
+
+summary(lsmodel1)
+#fuller summary of the model
+
+darwin %>% 
+  ggplot(aes(x=type, 
+             y=height,
+             colour=type))+
+  geom_jitter(alpha=0.5,
+              width=0.1)+
+  stat_summary(fun=mean,
+               size=1.2)+
+  theme_bw()
+#models superimposed the calculated means onto a plot
+
+confint(lsmodel1)
+#provides confidence intervals based on the ls model
+
+GGally::ggcoef_model(lsmodel1,
+                     show_p_values=FALSE, 
+                     conf.level=0.95)
+#tests Darwin's null hypothesis of self-pollination would reduce fitness
+#by using height as a proxy
+#tests whether predicted value lies within 95% confidence level for the difference of the mean
+
+broom::tidy(lsmodel1, conf.int=T, conf.level=0.99)
+#outputs a summary table
+
+darwin %>% 
+  mutate(type=factor(type)) %>% 
+  mutate(type=fct_relevel(type, c("Self", "Cross"))) %>% 
+  lm(height~type, data=.) %>% 
+  broom::tidy()
+#calculating the "other" mean and outputting a table
+
+means <- emmeans::emmeans(lsmodel1, specs = ~ type)
+means
+#provides mean, s.e and 95% confidence level estimates of all levels of model at once
+
+means %>% 
+  as_tibble() %>% 
+  ggplot(aes(x=type, 
+             y=emmean))+
+  geom_pointrange(aes(
+    ymin=lower.CL, 
+    ymax=upper.CL))
+#outputs a summary plot using the data from the emmeans model
+
+performance::check_model(lsmodel1)
+#provides assumption checking for:
+#1. that residual variance in our data is approx. normally distributed
+#2. that resdidual variance is approx. equal between groups
+
+performance::check_model(lsmodel1, check=c("normality","qq"))
+plot(lsmodel1, which=c(2,2))
+#outputs a plot of the Darwin data to check the data's normality
