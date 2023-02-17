@@ -47,3 +47,34 @@ tidy_model1[[2,2]] / tidy_model1[[2,3]]
 #creates some summary stats for the darwin data
 
 #Paired T ----
+lsmodel_darwin <- lm(height ~ type + factor(pair), data = darwin)
+summary(lsmodel_darwin)
+#now intercept is the height of crossed plants from pair 1
+
+lm(height ~ type + factor(pair), data = darwin) %>% 
+  broom::tidy(., conf.int=T) %>% 
+  slice(1:2) 
+  #just show first two rows
+#generating confidence intervals for the paired t-test
+
+m1 <- lm(height ~ type, data = darwin) %>% 
+  broom::tidy(., conf.int=T) %>% 
+  slice(2:2) %>% 
+  mutate(model="unpaired")
+  #creates the unpaired line for our plot
+
+m2 <- lm(height ~ type + factor(pair), data = darwin) %>% 
+  broom::tidy(., conf.int=T) %>% 
+  slice(2:2) %>% 
+  mutate(model="paired")
+  #creates the paired line for our plot
+
+rbind(m1,m2) %>% 
+  #combines the two 
+  ggplot(aes(model, estimate))+
+  geom_pointrange(aes(ymin=conf.high, ymax=conf.low))+
+  #sets the range for the x axis
+  geom_hline(aes(yintercept=0), linetype="dashed")+
+  theme_minimal()+
+  coord_flip()
+  #sets aesthetics for the plot
