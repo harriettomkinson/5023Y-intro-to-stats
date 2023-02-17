@@ -1,3 +1,4 @@
+# Student's t-test ----
 x <- seq(-4, 4, length=100)
 #sets the length and limits of the x axis
 hx <- dnorm(x)
@@ -22,3 +23,27 @@ legend("topright", inset=.05, title="Distributions",
        labels, lwd=2, lty=c(1, 1, 1, 1, 2), col=colors)
   #adds in a key explaining what each line is
 
+#Critical Values ----
+#a plot showing the values for critical t at each degree of freedom up to 30
+
+df <- c(1:30)
+
+# map_dbl forces returned values to be a single vector of numbers (rather than a list)
+critical_t <- map_dbl(df, ~qt(p=0.05/2, df=.x, lower.tail=FALSE))
+
+tibble(df,critical_t) %>% 
+  ggplot(aes(x=df, y=critical_t))+
+  geom_point()+
+  geom_line()+
+  geom_hline(aes(yintercept=1.96), linetype="dashed", colour="red")+
+  labs(x= "Degrees of Freedom",
+       y= expression(paste("Critical value of ", italic("t"))))
+
+#Summary Stats ----
+lsmodel1 <- lm(height ~ type, data = darwin)
+summary(lsmodel1)
+tidy_model1 <- broom::tidy(lsmodel1)
+tidy_model1[[2,2]] / tidy_model1[[2,3]]
+#creates some summary stats for the darwin data
+
+#Paired T ----
