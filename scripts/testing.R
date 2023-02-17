@@ -78,3 +78,46 @@ rbind(m1,m2) %>%
   theme_minimal()+
   coord_flip()
   #sets aesthetics for the plot
+
+#Repeatability ----
+#creates 20 new sampling experiments and calculates estimated mean difference for each experiment
+
+set.seed(1234)
+
+myList <- vector("list", 20)
+y <- tibble()
+
+for (i in 1:length(myList)) { 
+  
+  x <-  rnorm(n=12, mean=2.6, sd=2.83)
+  data <- tibble(x)
+  temp <- lm(x~1, data=data) %>% 
+    broom::tidy(conf.int=T) 
+  y <- rbind(y,temp)  
+  
+}
+
+y$`experiment number` <- rep(1:20)
+
+# the new dataframe y contains the results of 20 new experiments
+
+#Experimental Repeatability ----
+#using new data, how many had a significant difference?
+y%>%
+  mutate(`p value < 0.05` = if_else(p.value > 0.049, "non-significant", "significant")) %>%
+  #if p value is < 0.05, it is not significant
+  group_by(`p value < 0.05`) %>%
+  summarise(`number of experiments`=n())
+  #produces a summary
+
+#comparison of the estimates and confidence intervals
+y %>% 
+  ggplot(aes(x=`experiment number`, y=estimate))+
+  #sets x axis as experiment number and y as estimated mean
+  geom_pointrange(aes(ymin = conf.low, ymax=conf.high))+
+  #sets the point range of the plot
+  labs(y = "Estimated mean effect of outcrossing")+
+  #labels the y axis
+  geom_hline(linetype="dashed", yintercept=0.05)+
+  theme_minimal()
+  #aesthetic features of the plot
