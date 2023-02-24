@@ -145,3 +145,46 @@ p2 <- model_plot(y=".fitted", title="Linear prediction")
 p3 <- model_plot(y=".resid", title="Remaining pattern")
 
 #Normal Distribution ---- 
+plot(janka_ls1, which=c(2,2))
+#plots a model diagnostic plot using the confidence intervals
+
+#Equal Variance ----
+plot(janka_ls1, which=c(1,3))
+#produces standardised residuals, raw residual/standard deviation
+
+#Outliers ----
+plot(janka_ls1, which=c(4,5))
+#shows any outliers in the data
+
+#Prediction ----
+coef(janka_ls1)[1] + coef(janka_ls1)[2] * 65
+#using coefficients to work out the model
+
+predict(janka_ls1, newdata=list(dens=c(22,35,65)))
+#gives predicted values automatically rather than manually
+
+#Adding Confidence Intervals ----
+broom::augment(janka_ls1, newdata = tibble(dens=c(22,35,65)), se=TRUE)
+#for standard error
+
+broom::augment(janka_ls1, newdata=tibble(dens=c(22,35,65)), interval="confidence")
+#for 95% confidence levels
+
+emmeans::emmeans(janka_ls1, 
+                 specs = "dens", 
+                 at = list(dens = c(22, 35, 65)))
+#emmeans package good for predicting catagorical data, can also be used for continuous data
+
+#Prediction ----
+pred_newdata <- broom::augment(janka_ls1, 
+                               newdata=tibble(dens=c(22,35,65)))
+janka %>% 
+  ggplot(aes(x=dens, y=hardness))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  geom_point(data=pred_newdata, aes(y=.fitted, x=dens), colour="red")+
+  geom_label(data=pred_newdata, (aes(y=(.fitted+10), x=(dens+3), label=round(.fitted, digits=0))))+
+  theme_bw()+
+  labs(x="Density", y="Timber Hardness")+
+  scale_x_continuous(limits=c(20,80), expand=expansion(add=c(0,5)))
+#plots the 3 new predicted values onto a figure previously plotted
