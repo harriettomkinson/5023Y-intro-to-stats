@@ -53,3 +53,25 @@ janka %>%
 # specify linear model method for line fitting
 #with a regression line added too
 
+summary(janka_ls1)
+#provides summary statistics for the intercept and the differrence in the mean
+#from the intercept
+
+#Mean Centered Regression ----
+dens_mean <- janka %>% 
+  summarise(mean_dens=mean(dens))
+# 45.73333 - the centered mean calculated
+
+janka %>% 
+  mutate(centered_dens = dens-pull(dens_mean)) %>% 
+  lm(hardness ~ centered_dens, data = .) %>% 
+  broom::tidy()
+#creates a tibble with the summary statistics 
+
+confint(janka_ls1)
+#prints confidence intervals for the intercept and density
+
+summary(janka_ls1)
+#prints summary statistics, including R^2 values
+
+
