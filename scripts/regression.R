@@ -32,3 +32,24 @@ janka %>%
 #checks for n/a's in the data frame
 summary(janka)
 #produces a summary of the janka data
+
+#Exploratory Analysis ----
+janka %>%
+  ggplot(aes(x=dens, y=hardness))+
+  geom_point()
+#plotting a simple linear plot to look for a visual linear association between
+#wood density and timber hardness
+
+with(janka, cor(dens, hardness))
+#generating Pearson's R using the rstatix package
+
+janka_ls1 <- lm(hardness ~ dens, data = janka) 
+#this linear model will estimate a 'line of best fit'
+
+janka %>% 
+  ggplot(aes(x=dens, y=hardness))+
+  geom_point()+
+  geom_smooth(method="lm")
+# specify linear model method for line fitting
+#with a regression line added too
+
