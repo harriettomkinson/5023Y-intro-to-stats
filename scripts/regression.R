@@ -2,34 +2,42 @@
 library(tidyverse)
 library(rstatix)
 library(performance)
+library(patchwork)
 
 # Data Import ----
 janka <- read_csv ("data/Janka.csv")
 #reading the csv file into R
+
 head(janka)
 #checking data has loaded and first 10 rows printed
 
 #Data Check ----
 colnames(janka)
 #prints the column names
+
 glimpse(janka)
 #gives number of observations, both numerical and character text
+
 janka %>%
   duplicated() %>%
   sum()
 #checks for duplicate rows in the data - should be zero!
+
 janka %>%
   summarise(min=min(dens, na.rm=TRUE),
             max=max(dens, na.rm=TRUE))
 #gives the minimum and maximum density of the timber
+
 janka %>%
   summarise(min=min(hardness, na.rm=TRUE),
             max=max(hardness, na.rm=TRUE))
 #gives the minimum and maximum hardness of the timber
+
 janka %>%
   is.na %>%
   sum()
 #checks for n/a's in the data frame
+
 summary(janka)
 #produces a summary of the janka data
 
@@ -74,4 +82,66 @@ confint(janka_ls1)
 summary(janka_ls1)
 #prints summary statistics, including R^2 values
 
+#Assumptions ----
+predict(janka_ls1)
+#this gives the predicted values from the model
+resid(janka_ls1)
+#this gives the residual values (the difference between the observed values and 
+#fitted values by the model)
 
+augmented_ls1 <- janka_ls1 %>% 
+  broom::augment()
+augmented_ls1 %>% 
+  ggplot(aes(x=dens, 
+             y=.fitted))+
+  geom_line()+ 
+  geom_point(aes(x=dens, 
+                 y=hardness))+
+  geom_segment(aes(x=dens, 
+                   xend=dens, 
+                   y=.fitted, 
+                   yend=hardness), 
+               linetype="dashed", colour="red")
+#plots a black regression line and the residual values are represented by red
+#dashed lines
+
+# A line connecting all the data points in order 
+p1 <- augmented_ls1 %>% 
+  ggplot(aes(x=dens, y=hardness))+
+  geom_line()+
+  ggtitle("Full Data")
+
+# Plotting the fitted values against the independent e.g. our regression line
+p2 <- augmented_ls1 %>% 
+  ggplot(aes(x=dens, y=.fitted))+
+  geom_line()+
+  ggtitle("Linear trend")
+
+# Plotting the residuals against the fitted values e.g. remaining variance
+p3 <- augmented_ls1 %>% 
+  ggplot(aes(x=.fitted, y=.resid))+
+  geom_hline(yintercept=0, colour="white", size=5)+
+  geom_line()+
+  ggtitle("Remaining \npattern")
+
+p1+p2+p3
+
+#below, this code does the same as the code above, but in a more succinct way
+
+model_plot <- function(data=augmented_ls1, 
+                       x="dens", 
+                       y="hardness", 
+                       title="Full data"){
+  ggplot(aes(x=.data[[x]], 
+             y=.data[[y]]), 
+         data=data)+
+    geom_line()+
+    theme_bw()+
+    ggtitle(title)
+}
+
+p1 <- model_plot()
+p2 <- model_plot(y=".fitted", title="Linear prediction")
+p3 <- model_plot(y=".resid", title="Remaining pattern")
+
+#Normal Distribution ---- 
